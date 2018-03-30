@@ -22,6 +22,8 @@ defmodule North.MixProject do
 
   defp deps do
     [
+      {:cowboy, "~> 1.0.0"},
+      {:plug, "~> 1.0"},
       {:ex_doc, "~> 0.18", only: :dev, runtime: false}
     ]
   end
