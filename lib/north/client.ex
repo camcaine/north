@@ -26,4 +26,18 @@ defmodule North.Client do
             response_types: MapSet.new(~w(code)),
             scopes: [],
             secret: nil
+
+  @doc """
+  Checks if `client` can respond to `response_type`.
+
+  Returns `true` when `response_type` is a subset of `client.response_types`.
+  """
+  @spec respond_to?(t, [String.t(), ...]) :: boolean
+  def respond_to?(_client, []), do: false
+
+  def respond_to?(%__MODULE__{} = client, response_type) when is_list(response_type) do
+    response_type
+    |> MapSet.new()
+    |> MapSet.subset?(client.response_types)
+  end
 end
