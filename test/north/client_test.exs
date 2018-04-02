@@ -11,7 +11,7 @@ defmodule North.ClientTest do
       assert is_nil(client.id)
       assert is_nil(client.secret)
 
-      assert !!client.public
+      assert client.public
 
       assert [] = client.redirect_uris
       assert [] = client.scopes
@@ -35,6 +35,59 @@ defmodule North.ClientTest do
       assert false === Client.respond_to?(client, [])
       assert false === Client.respond_to?(client, ~w(unknown))
       assert false === Client.respond_to?(client, ~w(code token))
+    end
+  end
+
+  describe "match_redirect_uri/2" do
+    setup :client
+
+    test "with zero client redirect uris", %{client: client} do
+      assert :error = Client.match_redirect_uri(client)
+      assert :error = Client.match_redirect_uri(client, "")
+      assert :error = Client.match_redirect_uri(client, "https://example.com/cb")
+    end
+
+    test "with one client redirect uris", %{client: client} do
+      client = %{client | redirect_uris: ~w(https://example.com/cb)}
+
+      assert {:ok, %URI{}} = Client.match_redirect_uri(client)
+      assert {:ok, %URI{}} = Client.match_redirect_uri(client, "https://example.com/cb")
+
+      assert :error = Client.match_redirect_uri(client, "")
+      assert :error = Client.match_redirect_uri(client, "https://example.com/cb1")
+    end
+
+    test "with many client redirect uris", %{client: client} do
+      client = %{client | redirect_uris: ~w(https://example.com/cb1
+                                            https://example.com/cb2
+                                            https://example.com/cb3)}
+
+      assert {:ok, %URI{}} = Client.match_redirect_uri(client, "https://example.com/cb1")
+      assert {:ok, %URI{}} = Client.match_redirect_uri(client, "https://example.com/cb2")
+      assert {:ok, %URI{}} = Client.match_redirect_uri(client, "https://example.com/cb3")
+
+      assert :error = Client.match_redirect_uri(client)
+      assert :error = Client.match_redirect_uri(client, "")
+      assert :error = Client.match_redirect_uri(client, "https://example.com/cb")
+    end
+
+    test "case insensitivity", %{client: client} do
+      lowercase = "https://example.com/cb"
+      uppercase = "https://example.com/CB"
+
+      # with 1
+
+      client = %{client | redirect_uris: [uppercase]}
+      {:ok, uri} = Client.match_redirect_uri(client, lowercase)
+
+      assert ^lowercase = URI.to_string(uri)
+
+      # with n
+
+      client = %{client | redirect_uris: [lowercase, uppercase]}
+      {:ok, uri} = Client.match_redirect_uri(client, uppercase)
+
+      assert ^uppercase = URI.to_string(uri)
     end
   end
 end
