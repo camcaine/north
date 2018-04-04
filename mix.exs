@@ -7,6 +7,7 @@ defmodule North.MixProject do
       version: "0.0.1",
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
+      consolidate_protocols: Mix.env() != :test,
       deps: deps(),
       docs: docs(),
       name: "North",

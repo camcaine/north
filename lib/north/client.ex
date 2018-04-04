@@ -13,6 +13,7 @@ defmodule North.Client do
           secret: binary | nil
         }
 
+  @enforce_keys [:id]
   defstruct id: nil,
             public: true,
             # As per <https://tools.ietf.org/html/rfc7591#section-2>:

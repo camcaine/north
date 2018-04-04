@@ -2,13 +2,13 @@ defmodule North.ClientTest do
   use ExUnit.Case, async: true
   alias North.Client
 
-  def client(_context), do: [client: %Client{}]
+  def client(_context), do: [client: %Client{id: "123"}]
 
   describe "Client" do
     setup :client
 
     test "default values", %{client: client} do
-      assert is_nil(client.id)
+      assert client.id === "123"
       assert is_nil(client.secret)
 
       assert client.public
@@ -18,6 +18,11 @@ defmodule North.ClientTest do
 
       assert ~w(code) = MapSet.to_list(client.response_types)
       assert ~w(authorization_code) = MapSet.to_list(client.grant_types)
+    end
+
+    test "enforce id" do
+      assert %Client{} = %Client{id: "abc"}
+      assert_raise ArgumentError, fn -> struct!(Client) end
     end
   end
 
