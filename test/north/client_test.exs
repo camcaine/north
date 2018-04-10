@@ -2,6 +2,33 @@ defmodule North.ClientTest do
   use ExUnit.Case, async: true
   alias North.Client
 
+  defmodule StoreDirect do
+    @behaviour Client
+
+    @impl true
+    def fetch_client(id) when is_binary(id) do
+      case String.to_atom(id) do
+        :abc -> {:ok, %Client{id: "abc"}}
+        _ -> {:error, :not_found}
+      end
+    end
+  end
+
+  defmodule StoreDerive do
+    @behaviour Client
+
+    @derive North.Client.Registration
+    defstruct id: "123"
+
+    @impl true
+    def fetch_client(id) when is_binary(id) do
+      case String.to_atom(id) do
+        :abc -> {:ok, Client.register(%__MODULE__{})}
+        _ -> {:error, :not_found}
+      end
+    end
+  end
+
   def client(_context), do: [client: %Client{id: "123"}]
 
   describe "Client" do
@@ -23,6 +50,22 @@ defmodule North.ClientTest do
     test "enforce id" do
       assert %Client{} = %Client{id: "abc"}
       assert_raise ArgumentError, fn -> struct!(Client) end
+    end
+  end
+
+  describe "fetch_client/2" do
+    test ":from opt" do
+      assert_raise KeyError, fn() -> Client.fetch_client("abc") end
+    end
+
+    test "directly" do
+      assert {:ok, %Client{}} = Client.fetch_client("abc", from: StoreDirect)
+      assert {:error, :not_found} = Client.fetch_client("xyz", from: StoreDirect)
+    end
+
+    test "deriving" do
+      assert {:ok, %Client{}} = Client.fetch_client("abc", from: StoreDerive)
+      assert {:error, :not_found} = Client.fetch_client("xyz", from: StoreDerive)
     end
   end
 

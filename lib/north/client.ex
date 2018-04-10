@@ -29,6 +29,49 @@ defmodule North.Client do
             secret: nil
 
   @doc """
+  Callback to fetch a client by `id`.
+
+  Must be implemented to identify clients from incoming requests. This should
+  be used in conjunction with the `North.Client.Registration` protocol and the
+  `register/1` helper:
+
+      @derive North.Client.Registration
+      defstruct ...
+
+      @impl North.Client
+      def fetch_client(id) when is_binary(id) do
+        case Repo.get(MyApp.Client, id) do
+          nil -> {:error, :not_found}
+          cli -> {:ok, North.Client.register(cli)}
+        end
+      end
+
+  Must return either `{:ok, client}` or `{:error, :not_found}`.
+  """
+  @callback fetch_client(id :: binary) :: {:ok, t} | {:error, :not_found}
+
+  @doc """
+  Convenience for deriving a client from `struct`.
+
+  `struct` must implement the `North.Client.Registration` protocol.
+  """
+  @spec register(struct) :: t
+  defdelegate register(struct), to: North.Client.Registration
+
+  @doc """
+  Fetches client by `id`.
+
+  Where `id` is the client id (typically passed in requests). Expects a `:from`
+  keyword to be the module conforming to `North.Client` behaviour. For example:
+
+      fetch_client("123", from: MyApp.Auth)
+  """
+  @spec fetch_client(binary, Keyword.t) :: {:ok, t} | {:error, term}
+  def fetch_client(id, opts \\ []) when is_binary(id) do
+    Keyword.fetch!(opts, :from).fetch_client(id)
+  end
+
+  @doc """
   Checks if `client` can respond to `response_type`.
 
   Returns `true` when `response_type` is a subset of `client.response_types`.

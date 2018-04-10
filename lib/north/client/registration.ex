@@ -82,8 +82,8 @@ defimpl North.Client.Registration, for: Any do
       protocol: @protocol,
       value: struct,
       description: """
-      North.Client.Registration protocol must be derived directly.\
-      Deriving looks for keys it recognises. Only :id is required.\
+      North.Client.Registration protocol must be derived directly. \
+      Deriving looks for keys it recognises. Only :id is required. \
       Other keys are optional.
 
           @derive North.Client.Registration
