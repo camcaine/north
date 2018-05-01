@@ -13,5 +13,5 @@ defmodule North.Hasher do
   @doc """
   Verifies possible plaintext `password` is equivalent to hashed password `hash`.
   """
-  @callback equivalent?(password :: binary, hash :: binary) :: boolean
+  @callback verify(password :: binary, hash :: binary) :: boolean
 end

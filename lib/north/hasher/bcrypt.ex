@@ -9,7 +9,7 @@ defmodule North.Hasher.Bcrypt do
     as: :hash_pwd_salt
 
   @impl true
-  defdelegate equivalent?(password, hash),
+  defdelegate verify(password, hash),
     to: Bcrypt,
     as: :verify_pass
 end
