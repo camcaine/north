@@ -55,7 +55,7 @@ defmodule North.ClientTest do
 
   describe "fetch_client/2" do
     test ":from opt" do
-      assert_raise KeyError, fn() -> Client.fetch_client("abc") end
+      assert_raise KeyError, fn -> Client.fetch_client("abc") end
     end
 
     test "directly" do

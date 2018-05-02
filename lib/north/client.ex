@@ -59,6 +59,14 @@ defmodule North.Client do
   defdelegate register(struct), to: North.Client.Registration
 
   @doc """
+  Verifies the `client` secret against supplied `hash`.
+  """
+  @spec authenticate(t, binary) :: boolean
+  def authenticate(%__MODULE__{} = client, hash) when is_binary(hash) do
+    North.Hasher.Bcrypt.verify(client.secret, hash)
+  end
+
+  @doc """
   Fetches client by `id`.
 
   Where `id` is the client id (typically passed in requests). Expects a `:from`
@@ -66,7 +74,7 @@ defmodule North.Client do
 
       fetch_client("123", from: MyApp.Auth)
   """
-  @spec fetch_client(binary, Keyword.t) :: {:ok, t} | {:error, term}
+  @spec fetch_client(binary, Keyword.t()) :: {:ok, t} | {:error, term}
   def fetch_client(id, opts \\ []) when is_binary(id) do
     Keyword.fetch!(opts, :from).fetch_client(id)
   end

@@ -46,6 +46,7 @@ defmodule North.Client.RegistrationTest do
 
       assert_raise KeyError, fn -> register(uuid: 1) end
       assert_raise Protocol.UndefinedError, fn -> register([1]) end
+
       assert_raise ArgumentError, ~r[the following keys must also be given.*:id], fn ->
         register([])
       end
