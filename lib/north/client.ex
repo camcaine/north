@@ -86,13 +86,17 @@ defmodule North.Client do
 
   Returns `true` when `response_type` is a subset of `client.response_types`.
   """
-  @spec respond_to?(t, [String.t(), ...]) :: boolean
+  @spec respond_to?(t, String.t() | [String.t(), ...]) :: boolean
   def respond_to?(_client, []), do: false
 
-  def respond_to?(%__MODULE__{} = client, response_type) when is_list(response_type) do
-    response_type
+  def respond_to?(%__MODULE__{} = client, response_types) when is_list(response_types) do
+    response_types
     |> MapSet.new()
     |> MapSet.subset?(client.response_types)
+  end
+
+  def respond_to?(%__MODULE__{} = client, response_type) when is_binary(response_type) do
+    MapSet.member?(client.response_types, response_type)
   end
 
   @doc """

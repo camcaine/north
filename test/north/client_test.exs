@@ -84,6 +84,12 @@ defmodule North.ClientTest do
       assert false === Client.respond_to?(client, ~w(unknown))
       assert false === Client.respond_to?(client, ~w(code token))
     end
+
+    test "with string", %{client: client} do
+      assert Client.respond_to?(client, "code")
+      refute Client.respond_to?(client, "token")
+      refute Client.respond_to?(client, "unknown")
+    end
   end
 
   describe "match_redirect_uri/2" do
