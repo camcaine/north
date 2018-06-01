@@ -3,13 +3,15 @@ defmodule North.Client do
   Client (or application) representation.
   """
 
+  alias North.Scope
+
   @type t :: %__MODULE__{
           id: binary,
           grant_types: MapSet.t(),
           public: boolean,
           redirect_uris: [String.t(), ...],
           response_types: MapSet.t(),
-          scopes: [String.t()],
+          scopes: Scope.scope_list(),
           secret: binary | nil
         }
 
@@ -167,5 +169,26 @@ defmodule North.Client do
     uris
     |> Enum.map(&String.downcase/1)
     |> Enum.find_value(:error, fn v -> v === String.downcase(uri) && uri end)
+  end
+
+  @doc """
+  Matches granted and refused `scopes` against the `client`.
+
+  ## Options
+
+  * `:scope_matcher` - Required. Must provide a module that implements
+    the `North.Scope` behaviour.
+  """
+  @spec match_scopes(t, Scope.scope_list(), Keyword.t()) :: %{
+          granted: Scope.scope_list(),
+          refused: Scope.scope_list()
+        }
+  def match_scopes(%__MODULE__{} = client, scopes, opts \\ []) when is_list(scopes) do
+    [granted, refused] =
+      opts
+      |> Keyword.fetch!(:scope_matcher)
+      |> Scope.match(client.scopes, scopes)
+
+    %{granted: granted, refused: refused}
   end
 end

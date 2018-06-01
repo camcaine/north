@@ -138,4 +138,23 @@ defmodule North.ClientTest do
       assert ^uppercase = URI.to_string(uri)
     end
   end
+
+  describe "match_scopes/3" do
+    setup :client
+
+    test "wildcard matcher", %{client: client} do
+      client = %{client | scopes: ~w(foo bar)}
+      opts = [scope_matcher: North.Scope.Wildcard]
+
+      assert %{granted: ~w(foo)} = Client.match_scopes(client, ~w(foo), opts)
+      assert %{refused: ~w(baz)} = Client.match_scopes(client, ~w(baz), opts)
+      assert %{granted: ~w(foo), refused: ~w(baz)} = Client.match_scopes(client, ~w(foo baz), opts)
+    end
+
+    test "provides scope behaviour", %{client: client} do
+      assert_raise KeyError, fn ->
+        Client.match_scopes(client, [])
+      end
+    end
+  end
 end
